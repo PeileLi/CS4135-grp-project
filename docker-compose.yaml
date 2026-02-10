@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cs4135-backend
+    ports:
+      - "8080:8080"
+    networks:
+      - cs4135-network
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cs4135-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - cs4135-network
+
+networks:
+  cs4135-network:
+    driver: bridge
