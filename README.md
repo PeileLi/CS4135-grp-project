@@ -1,4 +1,5 @@
 # CS4135 group project
+**online order & delivery system**
 
 ## Project Introduction
 
@@ -19,3 +20,4 @@
 **Add-ons(Depending on progress)**
 - **Caching & Rate Limiting**： Redis
 - **Real-time updates**: WebSocket
+
