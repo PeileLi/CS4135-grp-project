@@ -14,3 +14,8 @@
 - **Backend**: Java21 + Spring Boot
 - **Database**: PostgreSQL
 - **Container**: Docker & Docker Compose
+- **Event-driven**： RabbitMQ
+
+**Add-ons(Depending on progress)**
+- **Caching & Rate Limiting**： Redis
+- **Real-time updates**: WebSocket
