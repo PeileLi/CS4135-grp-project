@@ -3,7 +3,7 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./frontend
+      context: ./backend
       dockerfile: Dockerfile
     container_name: cs4135-backend
     ports:
@@ -16,7 +16,7 @@ services:
       dockerfile: Dockerfile
     container_name: cs4135-frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
     networks:
       - cs4135-network
 
