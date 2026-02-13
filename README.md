@@ -1,11 +1,16 @@
 # CS4135 group project
 **online food order & delivery system**
 
+This project implements a distributed online food order & delivery system designed to simulate real-world interactions between customers, restaurants, delivery agents, and payment services.
+
 ## Project Introduction
+
+Online food delivery system typically involve multiple independent participants operating simultaneously. Payment providers, restaurant and delivery drivers function as separate systems rather than as a single tightly integrated application. Due to this inherent separation of responsibilities, the domain is particularly suitable for studying distributed architecture and asynchronous coordination between services.
+The system aims to demonstrate modern distributed system principles, including microservice-based architecture, event-driven communication, and the Saga pattern for managing distributed transactions.
 
 ## Team Member
 | # | Name | Student ID | Role | Description |
-|:----:|:----|:----:|:----|:----|
+|:-:|:-----|:----------:|:-----|:------------|
 | 1 | Peile Li | 22305319 | Project Manager | System Architecture / Database / Project Integration |
 | 2 | Tianxing Fan | 20100035 | Frontend Dev  | UI / Interaction / Front-end Logic |
 | 3 | Hongtao Zhu | 20282958 | Backend Dev | Backend Logic / Core Function Modules & Testing |
@@ -29,9 +34,9 @@
 
 ### For Local Development (Option 2)
 - [Java 21](https://adoptium.net/) (JDK 21+)
-- [Node.js](https://nodejs.org/) (v18+ recommended)
-- [npm](https://www.npmjs.com/) (v9+)
-- [Maven](https://maven.apache.org/) (optional, wrapper included)
+- [Node.js](https://nodejs.org/) (20+ LTS version recommended)
+- [npm](https://www.npmjs.com/)
+- [Maven](https://maven.apache.org/) 
 
 ## Getting Started
 
