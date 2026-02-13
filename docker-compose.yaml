@@ -1,15 +1,23 @@
-version: '3.8'
-
 services:
+  # 1. Backend
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: cs4135-backend
+    restart: on-failure
     ports:
       - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/cs4135db
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - postgres
+      - rabbitmq
     networks:
       - cs4135-network
+
+  # 2. Frontend
   frontend:
     build:
       context: ./frontend
@@ -17,6 +25,29 @@ services:
     container_name: cs4135-frontend
     ports:
       - "5173:5173"
+    networks:
+      - cs4135-network
+
+  # 3. Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: cs4135-postgres
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=cs4135db
+    ports:
+      - "5432:5432"
+    networks:
+      - cs4135-network
+
+  # 4. Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: cs4135-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672" # RabbitMQ management UI
     networks:
       - cs4135-network
 
