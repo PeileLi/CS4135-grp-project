@@ -1,7 +1,7 @@
 # CS4135 group project
 **online food order & delivery system**
 
-This project implements a distributed online food order & delivery system designed to simulate real-world interactions between customers, restaurants, delivery agents, and payment services.
+This project implements a distributed online food order & delivery system designed to simulate real-world interactions between customers, restaurants, delivery driver, and payment services.
 
 ## Project Introduction
 
@@ -124,3 +124,4 @@ npm run preview   # Preview production build
 npm run lint      # Run ESLint
 ```
 Frontend will be available at: http://localhost:5173
+
