@@ -26,6 +26,12 @@ The system aims to demonstrate modern distributed system principles, including m
 - **Caching & Rate Limiting**: Redis
 - **Real-time updates**: WebSocket
 
+## Documentation
+
+For detailed documentation on each component, please visit our [Project Wiki](https://github.com/PeileLi/CS4135-grp-project/wiki):
+- [Frontend Documentation](https://github.com/PeileLi/CS4135-grp-project/wiki/Frontend-Doc) - React components, UI design, and frontend architecture
+- [Backend Documentation](https://github.com/PeileLi/CS4135-grp-project/wiki/Backend-Doc) - API endpoints, service layer, and database schema
+
 ## Prerequisites
 
 ### For Docker (Option 1)
