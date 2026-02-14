@@ -1,0 +1,59 @@
+services:
+  # 1. Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cs4135-backend
+    restart: "no"
+    ports:
+      - "${BACKEND_PORT}:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_RABBITMQ_HOST=${SPRING_RABBITMQ_HOST}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - cs4135-network
+
+  # 2. Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cs4135-frontend
+    ports:
+      - "${FRONTEND_PORT}:5173"
+    networks:
+      - cs4135-network
+
+  # 3. Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: cs4135-postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    networks:
+      - cs4135-network
+
+  # 4. Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: cs4135-rabbitmq
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672" # RabbitMQ management UI
+    networks:
+      - cs4135-network
+
+networks:
+  cs4135-network:
+    driver: bridge
