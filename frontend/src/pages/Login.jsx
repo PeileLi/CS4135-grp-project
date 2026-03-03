@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, Mail, Lock, ArrowRight } from 'lucide-react';
+import { LogIn, ArrowRight } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -23,78 +23,70 @@ export default function Login() {
       const from = location.state?.from?.pathname || '/';
       navigate(from, { replace: true });
     } else {
-      setError('Incorrect email or password. Please try again.');
+      setError('Incorrect email or password.');
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 p-8 text-white text-center">
-          <div className="mx-auto w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
-            <LogIn className="w-10 h-10" />
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-4 text-gray-900">
+            <LogIn className="w-6 h-6" />
           </div>
-          <h1 className="text-3xl font-bold">Welcome Back</h1>
-          <p className="mt-2 opacity-90">Sign in to your food delivery account</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Welcome back</h1>
+          <p className="text-sm text-gray-500 mt-2">Please enter your details to sign in</p>
         </div>
 
         {/* Form */}
-        <div className="p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 transition"
-                  placeholder="your@email.com"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 transition"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            {error && (
-              <p className="text-red-500 text-sm text-center">{error}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-semibold flex items-center justify-center gap-2 transition disabled:opacity-70"
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </form>
-
-          <div className="mt-8 text-center">
-            <p className="text-gray-600">
-              Don’t have an account?{' '}
-              <Link to="/register" className="text-orange-500 font-semibold hover:underline">
-                Sign up for free
-              </Link>
-            </p>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
+              placeholder="Enter your email"
+            />
           </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
+              placeholder="••••••••"
+            />
+          </div>
+
+          {error && (
+            <p className="text-red-500 text-xs text-center bg-red-50 py-2 rounded-md">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Signing in...' : 'Sign in'}
+            {!loading && <ArrowRight className="w-4 h-4" />}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center text-sm text-gray-500">
+          Don’t have an account?{' '}
+          <Link to="/register" className="text-gray-900 font-medium hover:underline">
+            Sign up
+          </Link>
         </div>
       </div>
     </div>

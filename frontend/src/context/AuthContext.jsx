@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 
 const AuthContext = createContext();
@@ -26,9 +27,9 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     try {
-      const res = await axios.post('http://localhost:8080/api/auth/login', {
+      const res = await axios.post('/api/auth/login', {
         email,
         password,
       });
@@ -41,11 +42,11 @@ export const AuthProvider = ({ children }) => {
       console.error('Login failed:', err.response?.data || err.message);
       return false;
     }
-  };
+  }, []);
 
-  const register = async (fullName, email, password) => {
+  const register = useCallback(async (fullName, email, password) => {
     try {
-      const res = await axios.post('http://localhost:8080/api/auth/register', {
+      const res = await axios.post('/api/auth/register', {
         fullName,
         email,
         password,
@@ -59,26 +60,30 @@ export const AuthProvider = ({ children }) => {
       console.error('Register failed:', err.response?.data || err.message);
       return false;
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    user,
+    token,
+    isAuthenticated,
+    login,
+    register,
+    logout,
+  }), [user, token, isAuthenticated, login, register, logout]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        isAuthenticated,
-        login,
-        register,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
