@@ -68,7 +68,8 @@ docker-compose up --build -d
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:5173 |
-| Backend API | http://localhost:8080 |
+| API Gateway | http://localhost:8080 |
+| RabbitMQ Management | http://localhost:15672 |
 
 **Useful Docker Commands:**
 ```bash
@@ -79,7 +80,8 @@ docker-compose ps
 docker-compose logs -f
 
 # View logs for specific service
-docker-compose logs -f backend
+docker-compose logs -f api-gateway
+docker-compose logs -f user-service
 docker-compose logs -f frontend
 
 # Stop all services
@@ -89,24 +91,53 @@ docker-compose down
 docker-compose down -v
 
 # Rebuild specific service
-docker-compose up --build backend
+docker-compose up --build api-gateway
 docker-compose up --build frontend
 ```
 
 #### **Option 2: Run Separately (Local Development)**
 
-**Backend (Spring Boot)**
+**Backend (Spring Boot Microservices)**
+
+First, build all modules:
 ```bash
 cd backend
-
-# Using Maven Wrapper (recommended)
-./mvnw spring-boot:run        # Linux/Mac
-mvnw.cmd spring-boot:run      # Windows
-
-# Or with Maven installed globally
-mvn spring-boot:run
+mvn install -DskipTests
 ```
-Backend will be available at: http://localhost:8080
+
+Then start each service in a separate terminal:
+```bash
+# Terminal 1 - API Gateway (port 8080)
+mvn spring-boot:run -pl api-gateway
+
+# Terminal 2 - User Service (port 8081)
+mvn spring-boot:run -pl user-service
+
+# Terminal 3 - Restaurant Service (port 8082)
+mvn spring-boot:run -pl restaurant-service
+
+# Terminal 4 - Order Service (port 8083)
+mvn spring-boot:run -pl order-service
+
+# Terminal 5 - Payment Service (port 8084)
+mvn spring-boot:run -pl payment-service
+
+# Terminal 6 - Delivery Service (port 8085)
+mvn spring-boot:run -pl delivery-service
+
+# Terminal 7 - Notification Service (port 8086)
+mvn spring-boot:run -pl notification-service
+```
+
+| Service | Port |
+|---------|------|
+| API Gateway | 8080 |
+| User Service | 8081 |
+| Restaurant Service | 8082 |
+| Order Service | 8083 |
+| Payment Service | 8084 |
+| Delivery Service | 8085 |
+| Notification Service | 8086 |
 
 **Frontend (React + Vite)**
 ```bash

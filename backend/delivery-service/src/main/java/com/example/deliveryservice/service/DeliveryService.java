@@ -1,0 +1,57 @@
+package com.example.deliveryservice.service;
+
+import com.example.deliveryservice.model.Delivery;
+import com.example.deliveryservice.model.DeliveryStatus;
+import com.example.deliveryservice.model.Driver;
+import com.example.deliveryservice.repository.DeliveryRepository;
+import com.example.deliveryservice.repository.DriverRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class DeliveryService {
+
+    private final DeliveryRepository deliveryRepository;
+    private final DriverRepository driverRepository;
+
+    public Delivery getDeliveryByOrderId(Long orderId) {
+        return deliveryRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Delivery not found for order: " + orderId));
+    }
+
+    @Transactional
+    public Delivery updateStatus(Long deliveryId, DeliveryStatus status) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+        delivery.setStatus(status);
+
+        if (status == DeliveryStatus.DELIVERED && delivery.getDriver() != null) {
+            Driver driver = delivery.getDriver();
+            driver.setAvailable(true);
+            driverRepository.save(driver);
+        }
+
+        return deliveryRepository.save(delivery);
+    }
+
+    @Transactional
+    public Delivery assignDriver(Long deliveryId, Long driverId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+        Driver driver = driverRepository.findById(driverId)
+                .orElseThrow(() -> new RuntimeException("Driver not found"));
+
+        if (!driver.isAvailable()) {
+            throw new RuntimeException("Driver is not available");
+        }
+
+        delivery.setDriver(driver);
+        delivery.setStatus(DeliveryStatus.ASSIGNED);
+        driver.setAvailable(false);
+        driverRepository.save(driver);
+
+        return deliveryRepository.save(delivery);
+    }
+}

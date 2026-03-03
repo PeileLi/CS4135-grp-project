@@ -1,59 +1,158 @@
 services:
-  # 1. Backend
-  backend:
+  # --- Backend Microservices ---
+  api-gateway:
     build:
-      context: ./backend
+      context: ./backend/api-gateway
       dockerfile: Dockerfile
-    container_name: cs4135-backend
+    container_name: cs4135-api-gateway
     restart: "no"
     ports:
-      - "${BACKEND_PORT}:8080"
+      - "${GATEWAY_PORT:-8080}:8080"
     environment:
-      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - SPRING_RABBITMQ_HOST=${SPRING_RABBITMQ_HOST}
-      - JWT_SECRET=${JWT_SECRET}
+      - USER_SERVICE_URL=http://user-service:8081
+      - RESTAURANT_SERVICE_URL=http://restaurant-service:8082
+      - ORDER_SERVICE_URL=http://order-service:8083
+      - PAYMENT_SERVICE_URL=http://payment-service:8084
+      - DELIVERY_SERVICE_URL=http://delivery-service:8085
     depends_on:
-      - postgres
-      - rabbitmq
+      - user-service
+      - restaurant-service
+      - order-service
+      - payment-service
+      - delivery-service
     networks:
       - cs4135-network
 
-  # 2. Frontend
+  user-service:
+    build:
+      context: ./backend/user-service
+      dockerfile: Dockerfile
+    container_name: cs4135-user-service
+    restart: "no"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cs4135db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - postgres
+    networks:
+      - cs4135-network
+
+  restaurant-service:
+    build:
+      context: ./backend/restaurant-service
+      dockerfile: Dockerfile
+    container_name: cs4135-restaurant-service
+    restart: "no"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cs4135db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
+    depends_on:
+      - postgres
+    networks:
+      - cs4135-network
+
+  order-service:
+    build:
+      context: ./backend/order-service
+      dockerfile: Dockerfile
+    container_name: cs4135-order-service
+    restart: "no"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cs4135db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
+    depends_on:
+      - postgres
+    networks:
+      - cs4135-network
+
+  payment-service:
+    build:
+      context: ./backend/payment-service
+      dockerfile: Dockerfile
+    container_name: cs4135-payment-service
+    restart: "no"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cs4135db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
+    depends_on:
+      - postgres
+    networks:
+      - cs4135-network
+
+  delivery-service:
+    build:
+      context: ./backend/delivery-service
+      dockerfile: Dockerfile
+    container_name: cs4135-delivery-service
+    restart: "no"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cs4135db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
+    depends_on:
+      - postgres
+    networks:
+      - cs4135-network
+
+  notification-service:
+    build:
+      context: ./backend/notification-service
+      dockerfile: Dockerfile
+    container_name: cs4135-notification-service
+    restart: "no"
+    networks:
+      - cs4135-network
+
+  # --- Frontend ---
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: cs4135-frontend
     ports:
-      - "${FRONTEND_PORT}:5173"
+      - "${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - api-gateway
     networks:
       - cs4135-network
 
-  # 3. Database
+  # --- Infrastructure ---
   postgres:
     image: postgres:15-alpine
     container_name: cs4135-postgres
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-cs4135db}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - cs4135-network
 
-  # 4. Message Broker
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: cs4135-rabbitmq
     ports:
-      - "${RABBITMQ_PORT}:5672"
-      - "${RABBITMQ_MANAGEMENT_PORT}:15672" # RabbitMQ management UI
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
     networks:
       - cs4135-network
 
 networks:
   cs4135-network:
     driver: bridge
+
+volumes:
+  postgres-data:
