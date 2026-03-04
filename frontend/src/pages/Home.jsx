@@ -31,16 +31,17 @@ export default function Home() {
             { name: 'Dessert'},
             { name: 'Fast Food'},
             { name: 'Healthy'},
-          ].map((cat, i) => (
-            <div
-              key={i}
+          ].map((cat) => (
+            <button
+              key={cat.name}
+              type="button"
               onClick={() => navigate(`/restaurants?category=${cat.name.toLowerCase()}`)}
-              className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-sm transition cursor-pointer group"
+              className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-sm transition cursor-pointer group text-left"
             >
               <div className="text-4xl mb-4 group-hover:scale-110 transition">{cat.emoji}</div>
               <h3 className="font-medium text-gray-900">{cat.name}</h3>
               <p className="text-xs text-gray-500 mt-1">Explore restaurants</p>
-            </div>
+            </button>
           ))}
         </div>
       </div>
