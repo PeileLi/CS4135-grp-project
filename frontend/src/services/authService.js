@@ -1,10 +1,41 @@
-import axios from 'axios';
+export const loginAPI = (email, password) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      console.log(`Attempting login for ${email} with password length: ${password?.length}`);
+      
+      if (email && password) {
+        resolve({
+          data: {
+            user: {
+              id: 1,
+              fullName: "Demo Student",
+              email: email,
+              token: "mock-jwt-token"
+            }
+          }
+        });
+      } else {
+        reject(new Error("Invalid credentials"));
+      }
+    }, 800);
+  });
+};
 
-const API_URL = 'http://localhost:8080/api/auth';
-
-export const authService = {
-  login: async (email, password) => {
-    const res = await axios.post(`${API_URL}/login`, { email, password });
-    return res.data;
-  },
+export const registerAPI = (fullName, email, password) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(`Registering user ${fullName} with password length: ${password?.length}`);
+      
+      resolve({
+        data: {
+          user: {
+            id: Date.now(),
+            fullName: fullName,
+            email: email,
+            token: "mock-jwt-token"
+          }
+        }
+      });
+    }, 800);
+  });
 };
