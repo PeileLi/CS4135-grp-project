@@ -6,6 +6,7 @@ export default function ProtectedRoute({ children }) {
   const location = useLocation();
 
   if (!isAuthenticated) {
+    // state={{ from: location }} 这里的目的是：等用户登录成功后，能自动跳回他原本想去的页面
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

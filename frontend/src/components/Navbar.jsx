@@ -1,10 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { LogOut, ShoppingCart, Search } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
+  const { cartCount } = useCart();
+  
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -25,6 +28,9 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-gray-900 rounded-xl flex items-center justify-center text-white text-2xl">
+            🍔
+          </div>
           <span className="font-semibold text-2xl text-gray-900">FoodExpress</span>
         </Link>
 
@@ -51,9 +57,15 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-6">
-          {/* Cart */}
+          {/* Cart Icon with Badge */}
           <Link to="/cart" className="text-gray-600 hover:text-gray-900 transition relative">
-            <ShoppingCart className="w-5 h-5" />
+            <ShoppingCart className="w-6 h-6" />
+            
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
+                {cartCount}
+              </span>
+            )}
           </Link>
 
           {isAuthenticated && user ? (
