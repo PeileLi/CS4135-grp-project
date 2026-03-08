@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
 
 const Orders = () => {
@@ -14,9 +15,9 @@ const Orders = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="flex-1 w-full max-w-4xl mx-auto px-6 py-10">
         <h2 className="text-3xl font-bold mb-8">My Orders</h2>
 
         {orders.length === 0 ? (
@@ -58,6 +59,8 @@ const Orders = () => {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getRestaurants } from '../services/restaurantService';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const Restaurants = () => {
   const [searchParams] = useSearchParams();
@@ -35,10 +36,10 @@ const Restaurants = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="flex-1 w-full max-w-6xl mx-auto px-6 py-8">
         <h2 className="text-2xl font-bold mb-6 text-gray-900">
           {category 
             ? `${category.charAt(0).toUpperCase() + category.slice(1)} Restaurants` 
@@ -101,6 +102,8 @@ const Restaurants = () => {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

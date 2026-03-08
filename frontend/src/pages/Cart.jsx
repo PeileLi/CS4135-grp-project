@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 // 如果没有安装图标库，可以用文字代替，或者 npm install lucide-react
 import { Trash2, Plus, Minus, ArrowLeft } from 'lucide-react'; 
 
@@ -10,10 +11,10 @@ const Cart = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
       
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="flex-1 w-full max-w-4xl mx-auto px-6 py-10">
         <h2 className="text-3xl font-bold mb-8 text-gray-900">Your Cart</h2>
 
         {cartItems.length === 0 ? (
@@ -102,6 +103,8 @@ const Cart = () => {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

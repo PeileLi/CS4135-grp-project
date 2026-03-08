@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { LogOut, ShoppingCart, Search } from 'lucide-react';
+import { LogOut, ShoppingBag, Search, CupSoda } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Navbar() {
@@ -28,8 +28,8 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gray-900 rounded-xl flex items-center justify-center text-white text-2xl">
-            🍔
+          <div className="w-9 h-9 bg-gray-900 rounded-xl flex items-center justify-center text-white">
+            <CupSoda size={20} />
           </div>
           <span className="font-semibold text-2xl text-gray-900">FoodExpress</span>
         </Link>
@@ -48,25 +48,20 @@ export default function Navbar() {
           </div>
         </form>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-          <Link to="/" className="hover:text-gray-900 transition">Home</Link>
-          <Link to="/restaurants" className="hover:text-gray-900 transition">Restaurants</Link>
-          <Link to="/orders" className="hover:text-gray-900 transition">My Orders</Link>
-        </div>
-
-        {/* Right side */}
         <div className="flex items-center gap-6">
-          {/* Cart Icon with Badge */}
-          <Link to="/cart" className="text-gray-600 hover:text-gray-900 transition relative">
-            <ShoppingCart className="w-6 h-6" />
-            
-            {cartCount > 0 && (
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+            <Link to="/" className="hover:text-gray-900 transition">Home</Link>
+            <Link to="/restaurants" className="hover:text-gray-900 transition">Restaurants</Link>
+          </div>
+
+          {cartCount > 0 && (
+            <Link to="/cart" className="text-gray-600 hover:text-gray-900 transition relative">
+              <ShoppingBag className="w-6 h-6" />
               <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
                 {cartCount}
               </span>
-            )}
-          </Link>
+            </Link>
+          )}
 
           {isAuthenticated && user ? (
             <div className="flex items-center gap-4">

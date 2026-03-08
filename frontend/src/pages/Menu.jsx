@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getRestaurantById, getMenuByRestaurantId } from '../services/restaurantService';
 import { useCart } from '../context/CartContext';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { Plus } from 'lucide-react'; // 如果没有安装 lucide-react，可以用文字 "+" 代替
 
 const Menu = () => {
@@ -42,7 +43,7 @@ const Menu = () => {
   if (!restaurant) return <div className="p-10 text-center">Restaurant not found.</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
       
       {/* 餐厅头部信息 */}
@@ -91,6 +92,8 @@ const Menu = () => {
           ))}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

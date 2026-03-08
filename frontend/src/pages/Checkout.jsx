@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -44,9 +45,9 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <div className="max-w-3xl mx-auto px-6 py-10">
+      <div className="flex-1 w-full max-w-3xl mx-auto px-6 py-10">
         <h2 className="text-3xl font-bold mb-8">Checkout</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -100,6 +101,8 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
