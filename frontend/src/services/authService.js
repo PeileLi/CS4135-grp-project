@@ -19,7 +19,7 @@ export const loginAPI = (email, password) => {
   });
 };
 
-export const registerAPI = (fullName, email, password) => {
+export const registerAPI = (fullName, email, _password) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
