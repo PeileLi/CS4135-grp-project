@@ -1,8 +1,6 @@
 export const loginAPI = (email, password) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      console.log(`Attempting login for ${email} with password length: ${password?.length}`);
-      
       if (email && password) {
         resolve({
           data: {
@@ -21,11 +19,9 @@ export const loginAPI = (email, password) => {
   });
 };
 
-export const registerAPI = (fullName, email, password) => {
+export const registerAPI = (fullName, email, _password) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      console.log(`Registering user ${fullName} with password length: ${password?.length}`);
-      
       resolve({
         data: {
           user: {
