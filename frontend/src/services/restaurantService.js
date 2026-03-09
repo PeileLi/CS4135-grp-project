@@ -68,7 +68,6 @@ export const getRestaurantById = (id) => {
 };
 
 export const getMenuByRestaurantId = (id) => {
-  console.log(`Fetching menu for restaurant ${id}`);
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({ data: MOCK_MENU });
