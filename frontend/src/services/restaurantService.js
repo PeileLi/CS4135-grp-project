@@ -60,15 +60,14 @@ export const getRestaurants = () => {
 
 export const getRestaurantById = (id) => {
   return new Promise((resolve) => {
-    const restaurant = MOCK_RESTAURANTS.find(r => r.id === parseInt(id));
+    const restaurant = MOCK_RESTAURANTS.find(r => r.id === Number.parseInt(id));
     setTimeout(() => {
       resolve({ data: restaurant || MOCK_RESTAURANTS[0] });
     }, 500);
   });
 };
 
-export const getMenuByRestaurantId = (id) => {
-  console.log(`Fetching menu for restaurant ${id}`);
+export const getMenuByRestaurantId = (_id) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({ data: MOCK_MENU });
