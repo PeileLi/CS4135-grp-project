@@ -20,22 +20,14 @@ export default function Login() {
     setError('');
 
     try {
-      // 1. 调用 Mock API
       const response = await loginAPI(email, password);
-      
-      // 2. 获取用户数据
-      const userData = response.data.user;
-
-      // 3. 更新全局状态
-      login(userData);
-
-      // 4. 跳转
+      login(response.data);
       const from = location.state?.from?.pathname || '/';
       navigate(from, { replace: true });
-
     } catch (err) {
       console.error(err);
-      setError('Incorrect email or password.');
+      const msg = err.response?.data?.message || 'Incorrect email or password.';
+      setError(msg);
     } finally {
       setLoading(false);
     }

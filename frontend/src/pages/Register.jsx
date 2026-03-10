@@ -29,13 +29,13 @@ export default function Register() {
 
     try {
       const response = await registerAPI(fullName, email, password);
-      login(response.data.user);
+      login(response.data);
       const from = location.state?.from?.pathname || '/';
       navigate(from, { replace: true });
     } catch (err) {
-      // 修复：使用 console.error 打印错误，解决 'err' unused 报错
       console.error("Registration failed:", err);
-      setError('Registration failed. Please try again.');
+      const msg = err.response?.data?.message || 'Registration failed. Please try again.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
