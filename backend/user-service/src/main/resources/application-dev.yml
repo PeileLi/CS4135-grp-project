@@ -1,0 +1,6 @@
+logging:
+  level:
+    com.example.userservice: DEBUG
+
+jwt:
+  secret: dGhpcyBpcyBhIGRlZmF1bHQgZGV2IHNlY3JldCBrZXkgdGhhdCBzaG91bGQgYmUgcmVwbGFjZWQgaW4gcHJvZHVjdGlvbg==

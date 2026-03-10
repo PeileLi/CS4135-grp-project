@@ -17,3 +17,11 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+logging:
+  level:
+    com.example.userservice: INFO
