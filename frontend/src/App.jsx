@@ -1,52 +1,35 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
-// 页面组件
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Restaurants from './pages/Restaurants';
-import Menu from './pages/Menu';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
-import Merchant from './pages/Merchant';
-import Rider from './pages/Rider';
-
-// 保护组件
-import ProtectedRoute from './components/ProtectedRoute';
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 
 function App() {
+  const [count, setCount] = useState(0)
+
   return (
-    <Router>
-      <Routes>
-        {/* 公开路由 - 任何人都能看 */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/restaurants" element={<Restaurants />} />
-        <Route path="/restaurants/:id" element={<Menu />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/merchant" element={<Merchant />} />
-        <Route path="/rider" element={<Rider />} />
-        
-        {/* 受保护路由 - 只有登录后才能看 */}
-        {/* 如果没登录，会自动跳到 login，登录完再跳回来 */}
-        
-        <Route 
-          path="/checkout" 
-          element={
-            <ProtectedRoute>
-              <Checkout />
-            </ProtectedRoute>
-          } 
-        />
-        
-        <Route path="/orders" element={<Orders />} />
-        
-      </Routes>
-    </Router>
-  );
+    <>
+      <div>
+        <a href="https://vite.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+        <p>
+          Edit <code>src/App.jsx</code> and save to test HMR
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+    </>
+  )
 }
 
-export default App;
+export default App
