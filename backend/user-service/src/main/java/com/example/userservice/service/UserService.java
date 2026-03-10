@@ -3,6 +3,9 @@ package com.example.userservice.service;
 import com.example.userservice.dto.AuthResponse;
 import com.example.userservice.dto.LoginRequest;
 import com.example.userservice.dto.RegisterRequest;
+import com.example.userservice.exception.DuplicateEmailException;
+import com.example.userservice.exception.InvalidPasswordException;
+import com.example.userservice.exception.UserNotFoundException;
 import com.example.userservice.model.User;
 import com.example.userservice.model.UserRole;
 import com.example.userservice.repository.UserRepository;
@@ -17,13 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final String USER_NOT_FOUND = "User not found";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateEmailException("Email already exists");
         }
 
         UserRole role;
@@ -60,14 +65,12 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
                     log.error("User not found: {}", request.getEmail());
-                    return new RuntimeException("User not found");
+                    return new UserNotFoundException(USER_NOT_FOUND);
                 });
-
-        log.debug("User found, comparing passwords");
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.error("Invalid password for user: {}", request.getEmail());
-            throw new RuntimeException("Invalid password");
+            throw new InvalidPasswordException("Invalid password");
         }
 
         log.debug("Password matched, generating token");
@@ -84,12 +87,12 @@ public class UserService {
 
     public User getCurrentUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
     }
 
     public User updateUser(Long userId, RegisterRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
 
         user.setName(request.getName());
         user.setPhone(request.getPhone());
