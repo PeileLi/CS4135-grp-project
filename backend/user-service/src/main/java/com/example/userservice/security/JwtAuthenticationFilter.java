@@ -48,7 +48,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(jwtConfig.getTokenPrefix().length());
-        userEmail = jwtUtil.extractEmail(jwt);
+
+        try {
+            userEmail = jwtUtil.extractEmail(jwt);
+        } catch (Exception e) {
+            log.error("Failed to parse JWT token: {}", e.getMessage());
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);

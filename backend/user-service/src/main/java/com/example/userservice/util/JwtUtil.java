@@ -2,6 +2,7 @@ package com.example.userservice.util;
 
 import com.example.userservice.config.JwtConfig;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -33,9 +34,10 @@ public class JwtUtil {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(jwtConfig.getSecret())
-                .parseClaimsJws(token)
-                .getBody();
+                .verifyWith(jwtConfig.getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private Boolean isTokenExpired(String token) {
@@ -55,11 +57,11 @@ public class JwtUtil {
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtConfig.getExpiration()))
-                .signWith(SignatureAlgorithm.HS256, jwtConfig.getSecret())
+                .claims(claims)
+                .subject(subject)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + jwtConfig.getExpiration()))
+                .signWith(jwtConfig.getSigningKey())
                 .compact();
     }
 
@@ -67,7 +69,7 @@ public class JwtUtil {
         try {
             final String email = extractEmail(token);
             return (email.equals(userEmail) && !isTokenExpired(token));
-        } catch (SignatureException e) {
+        } catch (SecurityException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());
         } catch (MalformedJwtException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
