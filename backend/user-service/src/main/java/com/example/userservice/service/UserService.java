@@ -9,62 +9,92 @@ import com.example.userservice.exception.UserNotFoundException;
 import com.example.userservice.model.User;
 import com.example.userservice.model.UserRole;
 import com.example.userservice.repository.UserRepository;
+import com.example.userservice.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserService {
 
     private static final String USER_NOT_FOUND = "User not found";
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateEmailException("Email already exists");
         }
 
+        UserRole role;
+        try {
+            role = UserRole.valueOf(request.getRole().toUpperCase());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new IllegalArgumentException("Invalid role: " + request.getRole()
+                    + ". Valid roles are: CUSTOMER, RESTAURANT_OWNER, DELIVERY_DRIVER, ADMIN");
+        }
+
         User user = User.builder()
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .phone(request.getPhone())
-                .role(UserRole.valueOf(request.getRole()))
+                .role(role)
                 .build();
 
         userRepository.save(user);
 
+        String token = jwtUtil.generateTokenWithClaims(user.getEmail(), user.getRole().name());
+
         return AuthResponse.builder()
-                .token("placeholder-token") 
+                .token(token)
                 .email(user.getEmail())
                 .name(user.getName())
                 .role(user.getRole().name())
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
+        log.info("Login attempt for email: {}", request.getEmail());
 
-        
-        if (!user.getPassword().equals(request.getPassword())) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    log.error("User not found: {}", request.getEmail());
+                    return new UserNotFoundException(USER_NOT_FOUND);
+                });
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.error("Invalid password for user: {}", request.getEmail());
             throw new InvalidPasswordException("Invalid password");
         }
 
+        log.debug("Password matched, generating token");
+        String token = jwtUtil.generateTokenWithClaims(user.getEmail(), user.getRole().name());
+
+        log.info("Login successful for: {}", request.getEmail());
         return AuthResponse.builder()
-                .token("placeholder-token") 
+                .token(token)
                 .email(user.getEmail())
                 .name(user.getName())
                 .role(user.getRole().name())
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public User getCurrentUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
     }
 
+    @Transactional
     public User updateUser(Long userId, RegisterRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));

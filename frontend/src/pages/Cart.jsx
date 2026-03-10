@@ -39,7 +39,7 @@ const Cart = () => {
                     </div>
                     <div>
                       <h4 className="font-bold text-gray-900">{item.name}</h4>
-                      <p className="text-gray-500 text-sm">${item.price?.toFixed(2)}</p>
+                      <p className="text-gray-500 text-sm">€{item.price?.toFixed(2)}</p>
                     </div>
                   </div>
                   
@@ -80,15 +80,15 @@ const Cart = () => {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>${cartTotal.toFixed(2)}</span>
+                    <span>€{cartTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery Fee</span>
-                    <span>$2.99</span>
+                    <span>€2.99</span>
                   </div>
                   <div className="border-t border-gray-100 pt-3 flex justify-between font-bold text-lg text-gray-900">
                     <span>Total</span>
-                    <span>${(cartTotal + 2.99).toFixed(2)}</span>
+                    <span>€{(cartTotal + 2.99).toFixed(2)}</span>
                   </div>
                 </div>
                 

@@ -80,14 +80,14 @@ const Checkout = () => {
               {cartItems.map(item => (
                 <div key={item.id} className="flex justify-between text-sm">
                   <span className="text-gray-600">{item.quantity}x {item.name}</span>
-                  <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-medium">€{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
             <div className="border-t border-gray-100 pt-4 space-y-2">
-              <div className="flex justify-between text-gray-600"><span>Subtotal</span><span>${cartTotal.toFixed(2)}</span></div>
-              <div className="flex justify-between text-gray-600"><span>Delivery</span><span>$2.99</span></div>
-              <div className="flex justify-between font-bold text-lg pt-2"><span>Total</span><span>${(cartTotal + 2.99).toFixed(2)}</span></div>
+              <div className="flex justify-between text-gray-600"><span>Subtotal</span><span>€{cartTotal.toFixed(2)}</span></div>
+              <div className="flex justify-between text-gray-600"><span>Delivery</span><span>€2.99</span></div>
+              <div className="flex justify-between font-bold text-lg pt-2"><span>Total</span><span>€{(cartTotal + 2.99).toFixed(2)}</span></div>
             </div>
             
             <button 

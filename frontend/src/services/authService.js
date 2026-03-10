@@ -1,37 +1,9 @@
+import api from './api';
+
 export const loginAPI = (email, password) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (email && password) {
-        resolve({
-          data: {
-            user: {
-              id: 1,
-              fullName: "Demo Student",
-              email: email,
-              token: "mock-jwt-token"
-            }
-          }
-        });
-      } else {
-        reject(new Error("Invalid credentials"));
-      }
-    }, 800);
-  });
+  return api.post('/auth/login', { email, password });
 };
 
-export const registerAPI = (fullName, email, _password) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        data: {
-          user: {
-            id: Date.now(),
-            fullName: fullName,
-            email: email,
-            token: "mock-jwt-token"
-          }
-        }
-      });
-    }, 800);
-  });
+export const registerAPI = (email, password) => {
+  return api.post('/auth/register', { email, password, role: 'CUSTOMER' });
 };

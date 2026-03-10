@@ -80,7 +80,7 @@ const Menu = () => {
               </div>
               
               <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-50">
-                <span className="font-bold text-lg">${item.price?.toFixed(2)}</span>
+                <span className="font-bold text-lg">€{item.price?.toFixed(2)}</span>
                 <button 
                   onClick={() => handleAddToCart(item)}
                   className="bg-gray-900 text-white p-2 rounded-lg hover:bg-gray-800 transition active:scale-95 flex items-center gap-2 px-4 text-sm font-medium"
