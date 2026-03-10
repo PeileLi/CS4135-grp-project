@@ -6,27 +6,31 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       server:
         webflux:
           routes:
             - id: user-service
-              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              uri: lb://user-service
               predicates:
                 - Path=/api/auth/**, /api/users/**
             - id: restaurant-service
-              uri: ${RESTAURANT_SERVICE_URL:http://localhost:8082}
+              uri: lb://restaurant-service
               predicates:
                 - Path=/api/restaurants/**
             - id: order-service
-              uri: ${ORDER_SERVICE_URL:http://localhost:8083}
+              uri: lb://order-service
               predicates:
                 - Path=/api/orders/**
             - id: payment-service
-              uri: ${PAYMENT_SERVICE_URL:http://localhost:8084}
+              uri: lb://payment-service
               predicates:
                 - Path=/api/payments/**
             - id: delivery-service
-              uri: ${DELIVERY_SERVICE_URL:http://localhost:8085}
+              uri: lb://delivery-service
               predicates:
                 - Path=/api/deliveries/**
           default-filters:
@@ -34,7 +38,14 @@ spring:
           globalcors:
             cors-configurations:
               '[/**]':
-                allowedOrigins: "http://localhost:5173"
+                allowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
                 allowedMethods: "*"
                 allowedHeaders: "*"
                 allowCredentials: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
