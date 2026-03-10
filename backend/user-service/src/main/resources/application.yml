@@ -19,7 +19,7 @@ spring:
       path: /h2-console
 
 jwt:
-  secret: ${JWT_SECRET:dGhpcyBpcyBhIGRlZmF1bHQgZGV2IHNlY3JldCBrZXkgdGhhdCBzaG91bGQgYmUgcmVwbGFjZWQgaW4gcHJvZHVjdGlvbg==}
+  secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
 
 logging:

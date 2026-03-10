@@ -2,6 +2,7 @@ package com.example.userservice.config;
 
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +23,16 @@ public class JwtConfig {
     @Value("${jwt.header:Authorization}")
     private String headerString;
 
-    public SecretKey getSigningKey() {
+    private SecretKey signingKey;
+
+    @PostConstruct
+    public void init() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
+        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public SecretKey getSigningKey() {
+        return signingKey;
     }
 
     public long getExpiration() {

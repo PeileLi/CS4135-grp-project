@@ -2,6 +2,10 @@ package com.example.userservice.security;
 
 import com.example.userservice.config.JwtConfig;
 import com.example.userservice.util.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SecurityException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,7 +55,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             userEmail = jwtUtil.extractEmail(jwt);
-        } catch (Exception e) {
+        } catch (SecurityException | MalformedJwtException | ExpiredJwtException
+                 | UnsupportedJwtException | IllegalArgumentException e) {
             log.error("Failed to parse JWT token: {}", e.getMessage());
             filterChain.doFilter(request, response);
             return;

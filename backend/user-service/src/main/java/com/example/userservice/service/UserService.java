@@ -28,7 +28,7 @@ public class UserService {
 
         UserRole role;
         try {
-            role = UserRole.valueOf(request.getRole());
+            role = UserRole.valueOf(request.getRole().toUpperCase());
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new IllegalArgumentException("Invalid role: " + request.getRole()
                     + ". Valid roles are: CUSTOMER, RESTAURANT_OWNER, DELIVERY_DRIVER, ADMIN");
