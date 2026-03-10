@@ -6,14 +6,23 @@ import com.example.userservice.dto.RegisterRequest;
 import com.example.userservice.model.User;
 import com.example.userservice.model.UserRole;
 import com.example.userservice.repository.UserRepository;
+import com.example.userservice.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -22,7 +31,7 @@ public class UserService {
 
         User user = User.builder()
                 .email(request.getEmail())
-                .password(request.getPassword()) // TODO: BCrypt encoding
+                .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .phone(request.getPhone())
                 .role(UserRole.valueOf(request.getRole()))
@@ -30,8 +39,10 @@ public class UserService {
 
         userRepository.save(user);
 
+        String token = jwtUtil.generateTokenWithClaims(user.getEmail(), user.getRole().name());
+
         return AuthResponse.builder()
-                .token("placeholder-token") // TODO: JWT generation
+                .token(token)
                 .email(user.getEmail())
                 .name(user.getName())
                 .role(user.getRole().name())
@@ -39,16 +50,27 @@ public class UserService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        log.info("Login attempt for email: {}", request.getEmail());
 
-        // TODO: BCrypt password verification
-        if (!user.getPassword().equals(request.getPassword())) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    log.error("User not found: {}", request.getEmail());
+                    return new RuntimeException("User not found");
+                });
+
+        log.info("User found, comparing passwords");
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.error("Invalid password for user: {}", request.getEmail());
             throw new RuntimeException("Invalid password");
         }
 
+        log.info("Password matched, generating token");
+        String token = jwtUtil.generateTokenWithClaims(user.getEmail(), user.getRole().name());
+
+        log.info("Login successful for: {}", request.getEmail());
         return AuthResponse.builder()
-                .token("placeholder-token") // TODO: JWT generation
+                .token(token)
                 .email(user.getEmail())
                 .name(user.getName())
                 .role(user.getRole().name())
