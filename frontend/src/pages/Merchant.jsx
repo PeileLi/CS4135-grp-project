@@ -1,20 +1,24 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Store, ArrowRight, ArrowLeft, TrendingUp, Users, BarChart3, Headphones } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Store, ArrowRight, ArrowLeft, TrendingUp, Users, BarChart3, Headphones, LogIn, ShieldX } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
 
 export default function Merchant() {
+  const { user, isAuthenticated } = useAuth();
+
   const [formData, setFormData] = useState({
     restaurantName: '',
-    ownerName: '',
-    email: '',
+    ownerName: user?.name || '',
+    email: user?.email || '',
     phone: '',
     address: '',
     category: '',
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   const navigate = useNavigate();
 
@@ -30,6 +34,9 @@ export default function Merchant() {
       setSubmitted(true);
     }, 1500);
   };
+
+  const isDriverRole = isAuthenticated && user?.role === 'DELIVERY_DRIVER';
+  const canApply = isAuthenticated && !isDriverRole;
 
   if (submitted) {
     return (
@@ -100,112 +107,169 @@ export default function Merchant() {
               </div>
             </div>
 
-            {/* Right - Form */}
+            {/* Right - Form / Auth Gate */}
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Apply Now</h2>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 mb-1.5">Restaurant Name</label>
-                  <input
-                    id="restaurantName"
-                    name="restaurantName"
-                    type="text"
-                    value={formData.restaurantName}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
-                    placeholder="e.g. Mario's Pizza"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700 mb-1.5">Owner Name</label>
-                  <input
-                    id="ownerName"
-                    name="ownerName"
-                    type="text"
-                    value={formData.ownerName}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
-                    placeholder="John Doe"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="merchantEmail" className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-                  <input
-                    id="merchantEmail"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
-                    placeholder="restaurant@example.com"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
-                    placeholder="(555) 123-4567"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1.5">Restaurant Address</label>
-                  <input
-                    id="address"
-                    name="address"
-                    type="text"
-                    value={formData.address}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
-                    placeholder="123 Main St, Limerick"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1.5">Cuisine Category</label>
-                  <select
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
+              {!isAuthenticated && (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <LogIn className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">Login Required</h2>
+                  <p className="text-gray-500 mb-6 text-sm leading-relaxed">
+                    You need to log in before applying to become a merchant partner.
+                  </p>
+                  <Link
+                    to="/login"
+                    state={{ from: { pathname: '/merchant' } }}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-lg font-medium text-sm hover:bg-gray-800 transition"
                   >
-                    <option value="">Select a category</option>
-                    <option value="pizza">Pizza</option>
-                    <option value="burger">Burger</option>
-                    <option value="asian">Asian</option>
-                    <option value="sushi">Sushi</option>
-                    <option value="salad">Salad</option>
-                    <option value="dessert">Dessert</option>
-                    <option value="fast-food">Fast Food</option>
-                    <option value="healthy">Healthy</option>
-                  </select>
+                    Go to Login
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <p className="text-gray-400 text-xs mt-4">
+                    Don't have an account?{' '}
+                    <Link to="/register" className="text-gray-900 font-medium hover:underline">Register here</Link>
+                  </p>
                 </div>
+              )}
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
-                >
-                  {loading ? 'Submitting...' : 'Submit Application'}
-                  {!loading && <ArrowRight className="w-4 h-4" />}
-                </button>
-              </form>
+              {isDriverRole && (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <ShieldX className="w-8 h-8 text-red-400" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">Not Available</h2>
+                  <p className="text-gray-500 mb-6 text-sm leading-relaxed">
+                    Your account is registered as a Delivery Driver. Drivers cannot apply to become a merchant.
+                  </p>
+                  <button
+                    onClick={() => navigate('/')}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-lg font-medium text-sm hover:bg-gray-800 transition"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Home
+                  </button>
+                </div>
+              )}
+
+              {canApply && !showForm && (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Store className="w-8 h-8 text-gray-700" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">Ready to Get Started?</h2>
+                  <p className="text-gray-500 mb-2 text-sm">
+                    Logged in as <strong>{user?.email}</strong>
+                  </p>
+                  <p className="text-gray-400 mb-6 text-sm leading-relaxed">
+                    Click below to fill out the merchant application form.
+                  </p>
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-lg font-medium text-sm hover:bg-gray-800 transition"
+                  >
+                    Apply Now
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {canApply && showForm && (
+                <>
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">Application Form</h2>
+                  <p className="text-gray-400 text-sm mb-6">Applying as {user?.email}</p>
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 mb-1.5">Restaurant Name</label>
+                      <input
+                        id="restaurantName"
+                        name="restaurantName"
+                        type="text"
+                        value={formData.restaurantName}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
+                        placeholder="e.g. Mario's Pizza"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700 mb-1.5">Owner Name</label>
+                      <input
+                        id="ownerName"
+                        name="ownerName"
+                        type="text"
+                        value={formData.ownerName}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
+                        placeholder="John Doe"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
+                        placeholder="(555) 123-4567"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1.5">Restaurant Address</label>
+                      <input
+                        id="address"
+                        name="address"
+                        type="text"
+                        value={formData.address}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
+                        placeholder="123 Main St, Limerick"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1.5">Cuisine Category</label>
+                      <select
+                        id="category"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-900 transition-colors text-sm"
+                      >
+                        <option value="">Select a category</option>
+                        <option value="pizza">Pizza</option>
+                        <option value="burger">Burger</option>
+                        <option value="asian">Asian</option>
+                        <option value="sushi">Sushi</option>
+                        <option value="salad">Salad</option>
+                        <option value="dessert">Dessert</option>
+                        <option value="fast-food">Fast Food</option>
+                        <option value="healthy">Healthy</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+                    >
+                      {loading ? 'Submitting...' : 'Submit Application'}
+                      {!loading && <ArrowRight className="w-4 h-4" />}
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
 
           </div>

@@ -4,6 +4,6 @@ export const loginAPI = (email, password) => {
   return api.post('/auth/login', { email, password });
 };
 
-export const registerAPI = (name, email, password) => {
-  return api.post('/auth/register', { name, email, password, role: 'CUSTOMER' });
+export const registerAPI = (email, password) => {
+  return api.post('/auth/register', { email, password, role: 'CUSTOMER' });
 };

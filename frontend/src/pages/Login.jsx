@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { loginAPI } from '../services/authService'; // 引入服务
+import { loginAPI } from '../services/authService';
 import { LogIn, ArrowRight } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -34,7 +35,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
+      <div className="flex-1 flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-4 text-gray-900">
@@ -91,6 +94,7 @@ export default function Login() {
             Sign up
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );
