@@ -6,12 +6,12 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
       server:
         webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
           routes:
             - id: user-service
               uri: lb://user-service
@@ -42,6 +42,9 @@ spring:
                 allowedMethods: "*"
                 allowedHeaders: "*"
                 allowCredentials: true
+    loadbalancer:
+      cache:
+        ttl: 5s
 
 eureka:
   client:

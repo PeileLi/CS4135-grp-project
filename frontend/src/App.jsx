@@ -12,6 +12,7 @@ import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Merchant from './pages/Merchant';
 import Rider from './pages/Rider';
+import Profile from './pages/Profile';
 
 // 保护组件
 import ProtectedRoute from './components/ProtectedRoute';
@@ -43,6 +44,11 @@ function App() {
         />
         
         <Route path="/orders" element={<Orders />} />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
         
       </Routes>
     </Router>
