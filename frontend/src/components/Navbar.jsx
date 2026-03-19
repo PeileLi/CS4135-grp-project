@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { LogOut, ShoppingBag, CupSoda, ChevronDown, ClipboardList, UserCircle } from 'lucide-react';
+import { LogOut, ShoppingBag, CupSoda, ChevronDown, ClipboardList, UserCircle, Store, Bike } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -86,6 +86,29 @@ export default function Navbar() {
                       <UserCircle className="w-4 h-4 text-gray-400" />
                       Profile
                     </Link>
+
+                    {user.role === 'RESTAURANT_OWNER' && (
+                      <Link
+                        to="/merchant/dashboard"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+                      >
+                        <Store className="w-4 h-4 text-gray-400" />
+                        Merchant Dashboard
+                      </Link>
+                    )}
+
+                    {user.role === 'DELIVERY_DRIVER' && (
+                      <Link
+                        to="/rider/dashboard"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+                      >
+                        <Bike className="w-4 h-4 text-gray-400" />
+                        Rider Dashboard
+                      </Link>
+                    )}
+
                     <Link
                       to="/orders"
                       onClick={() => setDropdownOpen(false)}

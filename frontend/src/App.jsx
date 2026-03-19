@@ -13,6 +13,8 @@ import Orders from './pages/Orders';
 import Merchant from './pages/Merchant';
 import Rider from './pages/Rider';
 import Profile from './pages/Profile';
+import MerchantDashboard from './pages/MerchantDashboard';
+import RiderDashboard from './pages/RiderDashboard';
 
 // 保护组件
 import ProtectedRoute from './components/ProtectedRoute';
@@ -47,6 +49,16 @@ function App() {
         <Route path="/profile" element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/merchant/dashboard" element={
+          <ProtectedRoute>
+            <MerchantDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/rider/dashboard" element={
+          <ProtectedRoute>
+            <RiderDashboard />
           </ProtectedRoute>
         } />
         

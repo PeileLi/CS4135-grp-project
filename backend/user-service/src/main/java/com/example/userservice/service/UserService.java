@@ -33,12 +33,14 @@ public class UserService {
             throw new DuplicateEmailException("Email already exists");
         }
 
-        UserRole role;
-        try {
-            role = UserRole.valueOf(request.getRole().toUpperCase());
-        } catch (IllegalArgumentException | NullPointerException e) {
-            throw new IllegalArgumentException("Invalid role: " + request.getRole()
-                    + ". Valid roles are: CUSTOMER, RESTAURANT_OWNER, DELIVERY_DRIVER, ADMIN");
+        UserRole role = UserRole.CUSTOMER;
+        if (request.getRole() != null && !request.getRole().isBlank()) {
+            try {
+                role = UserRole.valueOf(request.getRole().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid role: " + request.getRole()
+                        + ". Valid roles are: CUSTOMER, RESTAURANT_OWNER, DELIVERY_DRIVER, ADMIN");
+            }
         }
 
         User user = User.builder()
@@ -54,6 +56,7 @@ public class UserService {
         String token = jwtUtil.generateTokenWithClaims(user.getEmail(), user.getRole().name());
 
         return AuthResponse.builder()
+                .id(user.getId())
                 .token(token)
                 .email(user.getEmail())
                 .name(user.getName())
@@ -81,6 +84,7 @@ public class UserService {
 
         log.info("Login successful for: {}", request.getEmail());
         return AuthResponse.builder()
+                .id(user.getId())
                 .token(token)
                 .email(user.getEmail())
                 .name(user.getName())
@@ -102,5 +106,39 @@ public class UserService {
         user.setName(request.getName());
         user.setPhone(request.getPhone());
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public AuthResponse upgradeRole(String email, String targetRole) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
+
+        if (user.getRole() != UserRole.CUSTOMER) {
+            throw new IllegalStateException("Only customers can upgrade their role");
+        }
+
+        UserRole newRole;
+        try {
+            newRole = UserRole.valueOf(targetRole.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid role: " + targetRole);
+        }
+
+        if (newRole != UserRole.RESTAURANT_OWNER && newRole != UserRole.DELIVERY_DRIVER) {
+            throw new IllegalArgumentException("Can only upgrade to RESTAURANT_OWNER or DELIVERY_DRIVER");
+        }
+
+        user.setRole(newRole);
+        userRepository.save(user);
+
+        String token = jwtUtil.generateTokenWithClaims(user.getEmail(), user.getRole().name());
+
+        return AuthResponse.builder()
+                .id(user.getId())
+                .token(token)
+                .email(user.getEmail())
+                .name(user.getName())
+                .role(user.getRole().name())
+                .build();
     }
 }

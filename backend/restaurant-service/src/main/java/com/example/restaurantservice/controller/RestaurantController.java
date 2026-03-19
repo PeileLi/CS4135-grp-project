@@ -1,5 +1,6 @@
 package com.example.restaurantservice.controller;
 
+import com.example.restaurantservice.dto.RestaurantRequest;
 import com.example.restaurantservice.model.Restaurant;
 import com.example.restaurantservice.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +27,24 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurantService.getRestaurant(id));
     }
 
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<List<Restaurant>> getRestaurantsByOwner(@PathVariable Long ownerId) {
+        return ResponseEntity.ok(restaurantService.getRestaurantsByOwner(ownerId));
+    }
+
     @PostMapping
-    public ResponseEntity<Restaurant> createRestaurant(@RequestBody Restaurant restaurant) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(restaurantService.createRestaurant(restaurant));
+    public ResponseEntity<Restaurant> createRestaurant(@RequestBody RestaurantRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(restaurantService.createRestaurant(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Restaurant> updateRestaurant(@PathVariable Long id, @RequestBody Restaurant restaurant) {
-        return ResponseEntity.ok(restaurantService.updateRestaurant(id, restaurant));
+    public ResponseEntity<Restaurant> updateRestaurant(@PathVariable Long id, @RequestBody RestaurantRequest request) {
+        return ResponseEntity.ok(restaurantService.updateRestaurant(id, request));
+    }
+
+    @PutMapping("/{id}/toggle-open")
+    public ResponseEntity<Restaurant> toggleOpen(@PathVariable Long id) {
+        return ResponseEntity.ok(restaurantService.toggleOpen(id));
     }
 
     @DeleteMapping("/{id}")
