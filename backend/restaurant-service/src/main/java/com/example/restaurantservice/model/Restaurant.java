@@ -29,10 +29,21 @@ public class Restaurant {
 
     private String phone;
 
+    private String category;
+
+    private String image;
+
+    private Double rating;
+
+    private String deliveryTime;
+
     private Long ownerId;
 
     @Column(nullable = false)
     private boolean active;
+
+    @Column(nullable = false)
+    private boolean open;
 
     private LocalDateTime createdAt;
 
@@ -40,5 +51,6 @@ public class Restaurant {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         active = true;
+        open = false;
     }
 }

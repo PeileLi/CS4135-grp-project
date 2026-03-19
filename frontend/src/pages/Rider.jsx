@@ -4,9 +4,10 @@ import { Bike, ArrowRight, ArrowLeft, Clock, MapPin, LogIn, ShieldX } from 'luci
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
+import { upgradeRoleAPI } from '../services/authService';
 
 export default function Rider() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, login, isAuthenticated } = useAuth();
 
   const [formData, setFormData] = useState({
     fullName: user?.name || '',
@@ -17,6 +18,7 @@ export default function Rider() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState('');
 
   const navigate = useNavigate();
 
@@ -24,17 +26,24 @@ export default function Rider() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError('');
+    try {
+      const response = await upgradeRoleAPI('DELIVERY_DRIVER');
+      login(response.data);
       setSubmitted(true);
-    }, 1500);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to upgrade role. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isOwnerRole = isAuthenticated && user?.role === 'RESTAURANT_OWNER';
-  const canApply = isAuthenticated && !isOwnerRole;
+  const isAlreadyDriver = isAuthenticated && user?.role === 'DELIVERY_DRIVER';
+  const canApply = isAuthenticated && !isOwnerRole && !isAlreadyDriver;
 
   if (submitted) {
     return (
@@ -45,16 +54,16 @@ export default function Rider() {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Bike className="w-8 h-8 text-green-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-3">Application Submitted!</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-3">You're Now a Rider!</h1>
             <p className="text-gray-500 mb-8">
-              Thank you, {formData.fullName}. We will review your rider application and contact you at <strong>{user?.email}</strong> shortly.
+              Welcome aboard, {formData.fullName}! Head to your dashboard to start accepting deliveries.
             </p>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/rider/dashboard')}
               className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition inline-flex items-center gap-2"
             >
-              <ArrowLeft size={18} />
-              Back to Home
+              <ArrowRight size={18} />
+              Go to Dashboard
             </button>
           </div>
         </div>
@@ -149,6 +158,25 @@ export default function Rider() {
                 </div>
               )}
 
+              {isAlreadyDriver && (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Bike className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">You're Already a Rider</h2>
+                  <p className="text-gray-500 mb-6 text-sm leading-relaxed">
+                    Your account is already registered as a Delivery Driver.
+                  </p>
+                  <button
+                    onClick={() => navigate('/rider/dashboard')}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-lg font-medium text-sm hover:bg-gray-800 transition"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                    Go to Dashboard
+                  </button>
+                </div>
+              )}
+
               {canApply && !showForm && (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -236,6 +264,10 @@ export default function Rider() {
                         placeholder="Limerick"
                       />
                     </div>
+
+                    {error && (
+                      <p className="text-red-500 text-xs text-center bg-red-50 py-2 rounded-md border border-red-100">{error}</p>
+                    )}
 
                     <button
                       type="submit"

@@ -1,5 +1,6 @@
 package com.example.restaurantservice.controller;
 
+import com.example.restaurantservice.dto.MenuItemRequest;
 import com.example.restaurantservice.model.MenuItem;
 import com.example.restaurantservice.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +23,13 @@ public class MenuController {
     }
 
     @PostMapping
-    public ResponseEntity<MenuItem> addMenuItem(@PathVariable Long restaurantId, @RequestBody MenuItem menuItem) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(restaurantService.addMenuItem(restaurantId, menuItem));
+    public ResponseEntity<MenuItem> addMenuItem(@PathVariable Long restaurantId, @RequestBody MenuItemRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(restaurantService.addMenuItem(restaurantId, request));
     }
 
     @PutMapping("/{itemId}")
-    public ResponseEntity<MenuItem> updateMenuItem(@PathVariable Long itemId, @RequestBody MenuItem menuItem) {
-        return ResponseEntity.ok(restaurantService.updateMenuItem(itemId, menuItem));
+    public ResponseEntity<MenuItem> updateMenuItem(@PathVariable Long itemId, @RequestBody MenuItemRequest request) {
+        return ResponseEntity.ok(restaurantService.updateMenuItem(itemId, request));
     }
 
     @DeleteMapping("/{itemId}")
