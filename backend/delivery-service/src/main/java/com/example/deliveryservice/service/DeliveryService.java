@@ -8,6 +8,7 @@ import com.example.deliveryservice.repository.DriverRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,15 +17,23 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DriverRepository driverRepository;
 
+    public List<Delivery> getAllDeliveries() {
+        return deliveryRepository.findAll();
+    }
+
+    public Delivery getDelivery(Long id) {
+        return deliveryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+    }
+
     public Delivery getDeliveryByOrderId(Long orderId) {
         return deliveryRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Delivery not found for order: " + orderId));
     }
 
     @Transactional
-    public Delivery updateStatus(Long deliveryId, DeliveryStatus status) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+    public Delivery updateStatus(Long id, DeliveryStatus status) {
+        Delivery delivery = getDelivery(id);
         delivery.setStatus(status);
 
         if (status == DeliveryStatus.DELIVERED && delivery.getDriver() != null) {
@@ -38,8 +47,7 @@ public class DeliveryService {
 
     @Transactional
     public Delivery assignDriver(Long deliveryId, Long driverId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+        Delivery delivery = getDelivery(deliveryId);
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
 
@@ -47,11 +55,19 @@ public class DeliveryService {
             throw new RuntimeException("Driver is not available");
         }
 
+        if (delivery.getStatus() != DeliveryStatus.PENDING) {
+            throw new RuntimeException("Delivery is not available for assignment");
+        }
+
         delivery.setDriver(driver);
         delivery.setStatus(DeliveryStatus.ASSIGNED);
         driver.setAvailable(false);
-        driverRepository.save(driver);
 
+        driverRepository.save(driver);
         return deliveryRepository.save(delivery);
+    }
+
+    public Delivery getDeliveryByOrder(Long orderId) {
+        return getDeliveryByOrderId(orderId);
     }
 }
