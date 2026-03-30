@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { LogOut, ShoppingBag, CupSoda, ChevronDown, ClipboardList, UserCircle, Store, Bike } from 'lucide-react';
+import { getUnreadCount } from '../services/notificationService';
+import { LogOut, ShoppingBag, CupSoda, ChevronDown, ClipboardList, UserCircle, Store, Bike, Bell, Heart } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -12,6 +13,7 @@ export default function Navbar() {
 
   const navigate = useNavigate();
 
+  const [unreadCount, setUnreadCount] = useState(0);
   const displayName = user?.name || (user?.email ? user.email.split('@')[0] : 'User');
 
   useEffect(() => {
@@ -23,6 +25,18 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchCount = () => {
+      getUnreadCount(user.id)
+        .then(res => setUnreadCount(res.data.count))
+        .catch(() => {});
+    };
+    fetchCount();
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleLogout = () => {
     setDropdownOpen(false);
@@ -41,6 +55,16 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-6">
+          {isAuthenticated && (
+            <Link to="/notifications" className="text-gray-600 hover:text-gray-900 transition relative">
+              <Bell className="w-6 h-6" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
           {cartCount > 0 && (
             <Link to="/cart" className="text-gray-600 hover:text-gray-900 transition relative">
               <ShoppingBag className="w-6 h-6" />
@@ -109,6 +133,27 @@ export default function Navbar() {
                       </Link>
                     )}
 
+                    <Link
+                      to="/notifications"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+                    >
+                      <Bell className="w-4 h-4 text-gray-400" />
+                      Notifications
+                      {unreadCount > 0 && (
+                        <span className="ml-auto text-xs font-medium text-white bg-red-500 rounded-full px-1.5 py-0.5 leading-none">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                    <Link
+                      to="/favourites"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+                    >
+                      <Heart className="w-4 h-4 text-gray-400" />
+                      My Favourites
+                    </Link>
                     <Link
                       to="/orders"
                       onClick={() => setDropdownOpen(false)}

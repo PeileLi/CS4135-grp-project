@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, MapPin, Clock, Star } from 'lucide-react';
+import { Search, MapPin, Clock, Star, Heart } from 'lucide-react';
 import { getRestaurants } from '../services/restaurantService';
+import { getUserFavourites, addFavourite, removeFavourite } from '../services/favouriteService';
+import { getAverageRating } from '../services/ratingService';
+import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -19,17 +22,31 @@ const CATEGORIES = [
 
 const Restaurants = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
 
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category')?.toLowerCase() || '');
+  const [favouriteIds, setFavouriteIds] = useState(new Set());
+  const [avgRatings, setAvgRatings] = useState({});
 
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
         const response = await getRestaurants();
-        setRestaurants(Array.isArray(response.data) ? response.data : []);
+        const list = Array.isArray(response.data) ? response.data : [];
+        setRestaurants(list);
+
+        const ratingPromises = list.map(r =>
+          getAverageRating(r.id)
+            .then(res => ({ id: r.id, avg: res.data.averageRating, total: res.data.totalRatings }))
+            .catch(() => ({ id: r.id, avg: null, total: 0 }))
+        );
+        const ratings = await Promise.all(ratingPromises);
+        const map = {};
+        ratings.forEach(r => { map[r.id] = r; });
+        setAvgRatings(map);
       } catch (err) {
         console.error("Failed to load restaurants", err);
       } finally {
@@ -38,6 +55,33 @@ const Restaurants = () => {
     };
     fetchRestaurants();
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    getUserFavourites(user.id)
+      .then(res => {
+        const ids = new Set(res.data.map(f => f.restaurantId));
+        setFavouriteIds(ids);
+      })
+      .catch(() => {});
+  }, [user]);
+
+  const toggleFavourite = async (e, restaurantId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user?.id) return;
+    try {
+      if (favouriteIds.has(restaurantId)) {
+        await removeFavourite(user.id, restaurantId);
+        setFavouriteIds(prev => { const s = new Set(prev); s.delete(restaurantId); return s; });
+      } else {
+        await addFavourite(user.id, restaurantId);
+        setFavouriteIds(prev => new Set(prev).add(restaurantId));
+      }
+    } catch (err) {
+      console.error('Failed to toggle favourite:', err);
+    }
+  };
 
   const handleCategoryClick = (cat) => {
     setActiveCategory(cat);
@@ -155,10 +199,29 @@ const Restaurants = () => {
                     <h3 className="text-lg font-bold text-gray-900 group-hover:text-gray-700 transition">
                       {restaurant.name}
                     </h3>
-                    <span className="flex items-center gap-1 text-sm font-semibold text-yellow-600">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      {restaurant.rating}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1 text-sm font-semibold text-yellow-600">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        {avgRatings[restaurant.id]?.avg != null
+                          ? `${Number(avgRatings[restaurant.id].avg).toFixed(1)} (${avgRatings[restaurant.id].total})`
+                          : (restaurant.rating ?? 'N/A')}
+                      </span>
+                      {user && (
+                        <button
+                          onClick={(e) => toggleFavourite(e, restaurant.id)}
+                          className="p-1 rounded-full hover:bg-red-50 transition"
+                          title={favouriteIds.has(restaurant.id) ? 'Remove from favourites' : 'Add to favourites'}
+                        >
+                          <Heart
+                            className={`w-5 h-5 transition ${
+                              favouriteIds.has(restaurant.id)
+                                ? 'fill-red-500 text-red-500'
+                                : 'text-gray-400 hover:text-red-400'
+                            }`}
+                          />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <p className="text-sm text-gray-500 capitalize mb-3">{restaurant.category}</p>
                   <div className="flex items-center gap-4 text-xs text-gray-400">
