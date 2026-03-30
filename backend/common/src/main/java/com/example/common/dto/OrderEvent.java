@@ -17,6 +17,7 @@ public class OrderEvent {
     private Long userId;
     private Long restaurantId;
     private BigDecimal totalAmount;
+    private String deliveryAddress;
     private String status;
     private LocalDateTime timestamp;
 }

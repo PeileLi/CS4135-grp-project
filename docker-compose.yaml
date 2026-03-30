@@ -127,10 +127,13 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
       - EUREKA_URL=http://eureka-server:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
     depends_on:
       postgres:
         condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - cs4135-network
@@ -147,10 +150,13 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
       - EUREKA_URL=http://eureka-server:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
     depends_on:
       postgres:
         condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - cs4135-network
@@ -167,10 +173,13 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
       - EUREKA_URL=http://eureka-server:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
     depends_on:
       postgres:
         condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - cs4135-network
@@ -182,9 +191,18 @@ services:
     container_name: cs4135-notification-service
     restart: "no"
     environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cs4135db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
       - EUREKA_URL=http://eureka-server:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
     depends_on:
+      postgres:
+        condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - cs4135-network

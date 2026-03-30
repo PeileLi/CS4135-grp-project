@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class PaymentEvent {
     private Long paymentId;
     private Long orderId;
+    private Long userId;
     private BigDecimal amount;
     private String status;
     private LocalDateTime timestamp;

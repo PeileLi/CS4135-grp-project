@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class DeliveryEvent {
     private Long deliveryId;
     private Long orderId;
+    private Long userId;
     private Long driverId;
     private String status;
     private LocalDateTime timestamp;
