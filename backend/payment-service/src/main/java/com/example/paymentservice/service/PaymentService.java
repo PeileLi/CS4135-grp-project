@@ -1,5 +1,9 @@
 package com.example.paymentservice.service;
 
+import com.example.common.dto.PaymentEvent;
+import com.example.paymentservice.exception.InvalidOperationException;
+import com.example.paymentservice.exception.ResourceNotFoundException;
+import com.example.paymentservice.messaging.PaymentEventPublisher;
 import com.example.paymentservice.model.Payment;
 import com.example.paymentservice.model.PaymentStatus;
 import com.example.paymentservice.repository.PaymentRepository;
@@ -9,16 +13,33 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
 
+    private static final String PAYMENT_NOT_FOUND = "Payment not found";
+
     private final PaymentRepository paymentRepository;
+    private final PaymentEventPublisher paymentEventPublisher;
 
     @Transactional
     public Payment createPayment(PaymentRequest request) {
+        Optional<Payment> existing = paymentRepository
+                .findFirstByOrderIdOrderByIdDesc(request.getOrderId());
+
+        if (existing.isPresent()) {
+            Payment p = existing.get();
+            if (p.getStatus() == PaymentStatus.FAILED) {
+                p.setStatus(PaymentStatus.PENDING);
+                p.setAmount(request.getAmount());
+                p.setPaymentMethod(request.getPaymentMethod());
+                return paymentRepository.save(p);
+            }
+            return p;
+        }
+
         Payment payment = Payment.builder()
                 .orderId(request.getOrderId())
                 .userId(request.getUserId())
@@ -33,72 +54,38 @@ public class PaymentService {
     @Transactional
     public Payment processPayment(Long paymentId, PaymentProcessRequest request) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(PAYMENT_NOT_FOUND));
 
-        if (payment.getStatus() != PaymentStatus.PENDING) {
-            throw new RuntimeException("Payment already processed");
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+            return payment;
         }
 
-        try {
-            String transactionId = processWithGateway(payment, request);
+        payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setPaymentMethod(request.getPaymentMethod());
 
-            payment.setStatus(PaymentStatus.SUCCESS);
-            payment.setPaymentMethod(request.getPaymentMethod());
+        Payment saved = paymentRepository.save(payment);
 
-        } catch (Exception e) {
-            payment.setStatus(PaymentStatus.FAILED);
-            throw new RuntimeException("Payment processing failed: " + e.getMessage());
-        }
+        PaymentEvent event = PaymentEvent.builder()
+                .paymentId(saved.getId())
+                .orderId(saved.getOrderId())
+                .userId(saved.getUserId())
+                .amount(saved.getAmount())
+                .status("SUCCESS")
+                .timestamp(LocalDateTime.now())
+                .build();
+        paymentEventPublisher.publishPaymentCompleted(event);
 
-        return paymentRepository.save(payment);
-    }
-
-    private String processWithGateway(Payment payment, PaymentProcessRequest request) {
-        validatePaymentInfo(request);
-        return "TXN_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
-    }
-
-    private void validatePaymentInfo(PaymentProcessRequest request) {
-        String method = request.getPaymentMethod();
-
-        switch (method.toLowerCase()) {
-            case "credit_card":
-                if (request.getCardNumber() == null || request.getCardNumber().length() != 16) {
-                    throw new RuntimeException("Invalid card number");
-                }
-                if (request.getExpiryDate() == null || request.getCvv() == null) {
-                    throw new RuntimeException("Missing card details");
-                }
-                break;
-
-            case "debit_card":
-                if (request.getCardNumber() == null || request.getCardNumber().length() != 16) {
-                    throw new RuntimeException("Invalid card number");
-                }
-                break;
-
-            case "paypal":
-                if (request.getPaypalEmail() == null) {
-                    throw new RuntimeException("PayPal email required");
-                }
-                break;
-
-            case "wallet":
-                break;
-
-            default:
-                throw new RuntimeException("Unsupported payment method: " + method);
-        }
+        return saved;
     }
 
     public Payment getPayment(Long paymentId) {
         return paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(PAYMENT_NOT_FOUND));
     }
 
     public Payment getPaymentByOrder(Long orderId) {
-        return paymentRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new RuntimeException("Payment not found for order"));
+        return paymentRepository.findFirstByOrderIdOrderByIdDesc(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found for order"));
     }
 
     public List<Payment> getUserPayments(Long userId) {
@@ -108,24 +95,19 @@ public class PaymentService {
     @Transactional
     public Payment refundPayment(Long paymentId, BigDecimal amount) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(PAYMENT_NOT_FOUND));
 
         if (payment.getStatus() != PaymentStatus.SUCCESS) {
-            throw new RuntimeException("Only successful payments can be refunded");
+            throw new InvalidOperationException("Only successful payments can be refunded");
         }
 
         BigDecimal refundAmount = amount != null ? amount : payment.getAmount();
 
         if (refundAmount.compareTo(payment.getAmount()) > 0) {
-            throw new RuntimeException("Refund amount exceeds payment amount");
+            throw new InvalidOperationException("Refund amount exceeds payment amount");
         }
 
-        try {
-            payment.setStatus(PaymentStatus.REFUNDED);
-        } catch (Exception e) {
-            throw new RuntimeException("Refund failed: " + e.getMessage());
-        }
-
+        payment.setStatus(PaymentStatus.REFUNDED);
         return paymentRepository.save(payment);
     }
 

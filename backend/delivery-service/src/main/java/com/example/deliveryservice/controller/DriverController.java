@@ -32,6 +32,11 @@ public class DriverController {
         return ResponseEntity.ok(driverService.getDriver(driverId));
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Driver> getDriverByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(driverService.getDriverByUserId(userId));
+    }
+
     @PatchMapping("/{driverId}/status")
     public ResponseEntity<Driver> updateDriverStatus(
             @PathVariable Long driverId,
@@ -61,5 +66,10 @@ public class DriverController {
     @GetMapping("/{driverId}/current-delivery")
     public ResponseEntity<Delivery> getCurrentDelivery(@PathVariable Long driverId) {
         return ResponseEntity.ok(driverService.getCurrentDelivery(driverId));
+    }
+
+    @GetMapping("/{driverId}/earnings")
+    public ResponseEntity<Map<String, Object>> getDriverEarnings(@PathVariable Long driverId) {
+        return ResponseEntity.ok(driverService.getDriverEarnings(driverId));
     }
 }

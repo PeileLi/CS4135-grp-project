@@ -23,7 +23,9 @@ public class Delivery {
     @Column(nullable = false)
     private Long orderId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    private Long userId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "driver_id")
     private Driver driver;
 
