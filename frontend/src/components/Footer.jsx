@@ -28,15 +28,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-white font-medium mb-4">Support</h3>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition">Help Centre</a></li>
-              <li><a href="#" className="hover:text-white transition">Contact Us</a></li>
-              <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
-            </ul>
-          </div>
         </div>
 
         <div className="border-t border-gray-800 mt-10 pt-6 text-center text-sm">

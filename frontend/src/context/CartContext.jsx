@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useCallback, useMemo, useState, useContext, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const CartContext = createContext();
 
@@ -6,19 +7,19 @@ const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  // 从 localStorage 初始化购物车
+  
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem('cartItems');
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // 监听变化自动保存
+  
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // 添加商品
-  const addToCart = (product) => {
+  
+  const addToCart = useCallback((product) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.id === product.id);
       if (existingItem) {
@@ -29,35 +30,38 @@ export const CartProvider = ({ children }) => {
         return [...prevItems, { ...product, quantity: 1 }];
       }
     });
-  };
+  }, []);
 
-  // 减少商品
-  const decreaseCartItem = (productId) => {
+  const decreaseCartItem = useCallback((productId) => {
     setCartItems((prevItems) => 
       prevItems.map(item => 
         item.id === productId ? { ...item, quantity: item.quantity - 1 } : item
       ).filter(item => item.quantity > 0)
     );
-  };
+  }, []);
 
-  // 移除商品
-  const removeFromCart = (productId) => {
+  const removeFromCart = useCallback((productId) => {
     setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
-  };
+  }, []);
 
-  // 清空购物车
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCartItems([]);
-  };
+  }, []);
 
   const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
+  const value = useMemo(() => ({
+    cartItems, addToCart, decreaseCartItem, removeFromCart, clearCart, cartTotal, cartCount,
+  }), [cartItems, addToCart, decreaseCartItem, removeFromCart, clearCart, cartTotal, cartCount]);
+
   return (
-    <CartContext.Provider value={{ 
-      cartItems, addToCart, decreaseCartItem, removeFromCart, clearCart, cartTotal, cartCount 
-    }}>
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
+};
+
+CartProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

@@ -1,34 +1,38 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import PropTypes from 'prop-types';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // 初始化时从 localStorage 读取用户
+  
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const login = (userData) => {
+  const login = useCallback((userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('user');
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     login,
     logout,
-    isAuthenticated: !!user
-  };
+    isAuthenticated: !!user,
+  }), [user, login, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// 忽略 Vite 的 Fast Refresh 导出警告，因为在这个场景下我们确实需要导出 Hook
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
