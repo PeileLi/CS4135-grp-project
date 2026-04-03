@@ -1,5 +1,7 @@
 package com.example.deliveryservice.service;
 
+import com.example.deliveryservice.exception.InvalidOperationException;
+import com.example.deliveryservice.exception.ResourceNotFoundException;
 import com.example.deliveryservice.model.Delivery;
 import com.example.deliveryservice.model.DeliveryStatus;
 import com.example.deliveryservice.model.Driver;
@@ -21,14 +23,18 @@ public class DeliveryService {
         return deliveryRepository.findAll();
     }
 
+    public List<Delivery> getAvailableDeliveries() {
+        return deliveryRepository.findByStatus(DeliveryStatus.PENDING);
+    }
+
     public Delivery getDelivery(Long id) {
         return deliveryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery not found"));
     }
 
     public Delivery getDeliveryByOrderId(Long orderId) {
         return deliveryRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new RuntimeException("Delivery not found for order: " + orderId));
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery not found for order: " + orderId));
     }
 
     @Transactional
@@ -49,14 +55,14 @@ public class DeliveryService {
     public Delivery assignDriver(Long deliveryId, Long driverId) {
         Delivery delivery = getDelivery(deliveryId);
         Driver driver = driverRepository.findById(driverId)
-                .orElseThrow(() -> new RuntimeException("Driver not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found"));
 
         if (!driver.isAvailable()) {
-            throw new RuntimeException("Driver is not available");
+            throw new InvalidOperationException("Driver is not available");
         }
 
         if (delivery.getStatus() != DeliveryStatus.PENDING) {
-            throw new RuntimeException("Delivery is not available for assignment");
+            throw new InvalidOperationException("Delivery is not available for assignment");
         }
 
         delivery.setDriver(driver);
