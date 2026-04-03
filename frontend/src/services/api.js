@@ -1,0 +1,33 @@
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: '/api',
+  headers: { 'Content-Type': 'application/json' },
+});
+
+api.interceptors.request.use((config) => {
+  const raw = localStorage.getItem('user');
+  if (raw) {
+    const user = JSON.parse(raw);
+    if (user.token) {
+      config.headers.Authorization = `Bearer ${user.token}`;
+    }
+    if (user.id) {
+      config.headers['X-User-Id'] = user.id;
+    }
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('user');
+      globalThis.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;
