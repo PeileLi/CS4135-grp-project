@@ -21,10 +21,7 @@ The system aims to demonstrate modern distributed system principles, including m
 - **Database**: PostgreSQL
 - **Container**: Docker & Docker Compose
 - **Event-driven**: RabbitMQ
-
-**Add-ons(Depending on progress)**
-- **Caching & Rate Limiting**: Redis
-- **Real-time updates**: WebSocket
+- **Service Discovery**: Eureka Server
 
 ## Documentation
 
@@ -42,7 +39,9 @@ For detailed documentation on each component, please visit our [Project Wiki](ht
 - [Java 21](https://adoptium.net/) (JDK 21+)
 - [Node.js](https://nodejs.org/) (20+ LTS version recommended)
 - [npm](https://www.npmjs.com/)
-- [Maven](https://maven.apache.org/) 
+- [Maven](https://maven.apache.org/)
+- [PostgreSQL](https://www.postgresql.org/) (15+)
+- [RabbitMQ](https://www.rabbitmq.com/) (3.x)
 
 ## Getting Started
 
@@ -52,7 +51,13 @@ git clone https://github.com/PeileLi/CS4135-grp-project.git
 cd CS4135-grp-project
 ```
 
-### 2. Start the Application
+### 2. Configure Environment
+```bash
+cp .env.example .env
+```
+Edit `.env` to customize settings (database credentials, JWT secret, ports, etc.). The defaults work out of the box for local development.
+
+### 3. Start the Application
 
 #### **Option 1: Using Docker Compose (Recommended)**
 
@@ -69,6 +74,7 @@ docker-compose up --build -d
 |---------|-----|
 | Frontend | http://localhost:5173 |
 | API Gateway | http://localhost:8080 |
+| Eureka Dashboard | http://localhost:8761 |
 | RabbitMQ Management | http://localhost:15672 |
 
 **Useful Docker Commands:**
@@ -97,6 +103,8 @@ docker-compose up --build frontend
 
 #### **Option 2: Run Separately (Local Development)**
 
+**Prerequisites for local run:** Make sure PostgreSQL and RabbitMQ are running locally (or via Docker) before starting the backend services.
+
 **Backend (Spring Boot Microservices)**
 
 First, build all modules:
@@ -105,39 +113,43 @@ cd backend
 mvn install -DskipTests
 ```
 
-Then start each service in a separate terminal:
+Then start each service in a separate terminal (start in order):
 ```bash
-# Terminal 1 - API Gateway (port 8080)
+# Terminal 1 - Eureka Server (port 8761) — start first
+mvn spring-boot:run -pl eureka-server
+
+# Terminal 2 - API Gateway (port 8080)
 mvn spring-boot:run -pl api-gateway
 
-# Terminal 2 - User Service (port 8081)
+# Terminal 3 - User Service (port 8081)
 mvn spring-boot:run -pl user-service
 
-# Terminal 3 - Restaurant Service (port 8082)
+# Terminal 4 - Restaurant Service (port 8082)
 mvn spring-boot:run -pl restaurant-service
 
-# Terminal 4 - Order Service (port 8083)
+# Terminal 5 - Order Service (port 8083)
 mvn spring-boot:run -pl order-service
 
-# Terminal 5 - Payment Service (port 8084)
+# Terminal 6 - Payment Service (port 8084)
 mvn spring-boot:run -pl payment-service
 
-# Terminal 6 - Delivery Service (port 8085)
+# Terminal 7 - Delivery Service (port 8085)
 mvn spring-boot:run -pl delivery-service
 
-# Terminal 7 - Notification Service (port 8086)
+# Terminal 8 - Notification Service (port 8086)
 mvn spring-boot:run -pl notification-service
 ```
 
-| Service | Port |
-|---------|------|
-| API Gateway | 8080 |
-| User Service | 8081 |
-| Restaurant Service | 8082 |
-| Order Service | 8083 |
-| Payment Service | 8084 |
-| Delivery Service | 8085 |
-| Notification Service | 8086 |
+| Service | Port | Description |
+|---------|------|-------------|
+| Eureka Server | 8761 | Service discovery |
+| API Gateway | 8080 | Request routing |
+| User Service | 8081 | Auth & user management |
+| Restaurant Service | 8082 | Restaurant & menu management |
+| Order Service | 8083 | Order, rating & discount |
+| Payment Service | 8084 | Payment processing |
+| Delivery Service | 8085 | Delivery & driver management |
+| Notification Service | 8086 | Notification handling |
 
 **Frontend (React + Vite)**
 ```bash
