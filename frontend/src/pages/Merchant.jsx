@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Store, ArrowRight, ArrowLeft, TrendingUp, Users, BarChart3, Headphones, LogIn, ShieldX } from 'lucide-react';
+import { Store, ArrowRight, ArrowLeft, LogIn, ShieldX } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
@@ -86,50 +86,20 @@ export default function Merchant() {
     );
   }
 
-  const benefits = [
-    { icon: TrendingUp, title: 'Grow Your Business', desc: 'Reach thousands of new customers in your area and increase your revenue.' },
-    { icon: Users, title: 'Wider Audience', desc: 'Get discovered by hungry customers searching for restaurants like yours.' },
-    { icon: BarChart3, title: 'Analytics Dashboard', desc: 'Track your orders, revenue, and customer feedback in real time.' },
-    { icon: Headphones, title: 'Dedicated Support', desc: 'Our partner support team is available 7 days a week to help you succeed.' },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <div className="flex-1">
-        <div className="max-w-6xl mx-auto px-6 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-
-            {/* Left - Introduction */}
-            <div>
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gray-900 mb-6 text-white">
-                <Store className="w-7 h-7" />
-              </div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-4 tracking-tight">
-                Become a Merchant
-              </h1>
-              <p className="text-lg text-gray-500 mb-10 leading-relaxed">
-                Partner with FoodExpress and bring your restaurant online. List your menu, receive orders, and let our riders handle the delivery.
-              </p>
-
-              <div className="space-y-6">
-                {benefits.map((item) => (
-                  <div key={item.title} className="flex gap-4">
-                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-5 h-5 text-gray-700" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                      <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-lg">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gray-900 mb-4 text-white">
+              <Store className="w-7 h-7" />
             </div>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Become a Merchant</h1>
+          </div>
 
-            {/* Right - Form / Auth Gate */}
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
 
               {!isAuthenticated && (
                 <div className="text-center py-8">
@@ -314,8 +284,6 @@ export default function Merchant() {
                   </form>
                 </>
               )}
-            </div>
-
           </div>
         </div>
       </div>

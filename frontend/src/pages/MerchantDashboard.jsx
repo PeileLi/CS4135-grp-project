@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getRestaurantsByOwner, addMenuItem, updateMenuItem, deleteMenuItem, getMenuByRestaurantId, updateRestaurant, toggleRestaurantOpen } from '../services/restaurantService';
+import { getRestaurantOrders, updateOrderStatus, getRestaurantRevenue } from '../services/orderService';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Store, Plus, Pencil, Trash2, Save, X, Package, ChevronDown, ChevronUp } from 'lucide-react';
+import { Store, Plus, Pencil, Trash2, Save, X, Package, ChevronDown, ChevronUp, ClipboardList, DollarSign, RefreshCw } from 'lucide-react';
 
 export default function MerchantDashboard() {
   const { user } = useAuth();
@@ -17,6 +18,11 @@ export default function MerchantDashboard() {
   const [editingItem, setEditingItem] = useState(null);
   const [newItem, setNewItem] = useState(null);
   const [editingRestaurant, setEditingRestaurant] = useState(null);
+
+  const [activeTab, setActiveTab] = useState('menu');
+  const [orders, setOrders] = useState({});
+  const [revenue, setRevenue] = useState({});
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   useEffect(() => {
     if (user?.role !== 'RESTAURANT_OWNER') {
@@ -110,6 +116,56 @@ export default function MerchantDashboard() {
     } catch { /* ignore */ }
   };
 
+  const fetchOrdersForAll = async () => {
+    setOrdersLoading(true);
+    try {
+      const results = {};
+      const revResults = {};
+      for (const r of restaurants) {
+        const [ordersRes, revRes] = await Promise.all([
+          getRestaurantOrders(r.id),
+          getRestaurantRevenue(r.id),
+        ]);
+        results[r.id] = ordersRes.data;
+        revResults[r.id] = revRes.data;
+      }
+      setOrders(results);
+      setRevenue(revResults);
+    } catch { /* ignore */ }
+    setOrdersLoading(false);
+  };
+
+  useEffect(() => {
+    if (activeTab === 'orders' && restaurants.length > 0) {
+      fetchOrdersForAll();
+    }
+  }, [activeTab, restaurants.length]);
+
+  const handleStatusUpdate = async (orderId, newStatus) => {
+    try {
+      await updateOrderStatus(orderId, newStatus);
+      await fetchOrdersForAll();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update order status.');
+    }
+  };
+
+  const ORDER_STATUS_FLOW = {
+    PENDING: { next: 'CONFIRMED', label: 'Confirm Order', color: 'bg-blue-600 hover:bg-blue-700' },
+    CONFIRMED: { next: 'PREPARING', label: 'Start Preparing', color: 'bg-orange-600 hover:bg-orange-700' },
+    PREPARING: { next: 'READY', label: 'Mark Ready', color: 'bg-purple-600 hover:bg-purple-700' },
+  };
+
+  const STATUS_BADGE = {
+    PENDING: 'bg-yellow-100 text-yellow-800',
+    CONFIRMED: 'bg-blue-100 text-blue-800',
+    PREPARING: 'bg-orange-100 text-orange-800',
+    READY: 'bg-purple-100 text-purple-800',
+    DELIVERING: 'bg-indigo-100 text-indigo-800',
+    DELIVERED: 'bg-green-100 text-green-800',
+    CANCELLED: 'bg-red-100 text-red-800',
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -126,10 +182,10 @@ export default function MerchantDashboard() {
       <Navbar />
 
       <div className="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Merchant Dashboard</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage your restaurants and menus</p>
+            <p className="text-sm text-gray-500 mt-1">Manage your restaurants, menus and orders</p>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Store className="w-4 h-4" />
@@ -137,13 +193,108 @@ export default function MerchantDashboard() {
           </div>
         </div>
 
-        {restaurants.length === 0 ? (
+        {/* Tabs */}
+        <div className="flex gap-1 mb-8 bg-gray-100 p-1 rounded-xl w-fit">
+          <button
+            onClick={() => setActiveTab('menu')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === 'menu' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <span className="flex items-center gap-2"><Package className="w-4 h-4" /> Menu Management</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === 'orders' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <span className="flex items-center gap-2"><ClipboardList className="w-4 h-4" /> Orders</span>
+          </button>
+        </div>
+
+        {restaurants.length === 0 && (
           <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
             <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-gray-900 mb-2">No Restaurants Yet</h2>
             <p className="text-sm text-gray-500">Your restaurant will appear here after it's been created.</p>
           </div>
-        ) : (
+        )}
+
+        {restaurants.length > 0 && activeTab === 'orders' && (
+          /* ====== ORDERS TAB ====== */
+          <div className="space-y-6">
+            {/* Revenue cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {restaurants.map(r => (
+                <div key={r.id} className="bg-white rounded-xl border border-gray-200 p-5">
+                  <p className="text-sm text-gray-500 mb-1">{r.name}</p>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    <span className="text-2xl font-bold text-gray-900">
+                      &euro;{Number(revenue[r.id]?.revenue || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">{revenue[r.id]?.orderCount || 0} orders today</p>
+                </div>
+              ))}
+            </div>
+
+            {ordersLoading ? (
+              <div className="text-center py-10 text-gray-400">Loading orders...</div>
+            ) : (
+              restaurants.map(r => {
+                const rOrders = orders[r.id] || [];
+                return (
+                  <div key={r.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                    <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900">{r.name} &mdash; Orders</h3>
+                      <button onClick={fetchOrdersForAll} className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100 transition">
+                        <RefreshCw className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {rOrders.length === 0 ? (
+                      <div className="px-6 py-8 text-center text-sm text-gray-400">No orders yet.</div>
+                    ) : (
+                      <div className="divide-y divide-gray-100">
+                        {rOrders.map(order => (
+                          <div key={order.id} className="px-6 py-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <span className="font-semibold text-gray-900">Order #{order.id}</span>
+                                <span className="text-xs text-gray-500 ml-3">
+                                  {new Date(order.createdAt).toLocaleString()}
+                                </span>
+                              </div>
+                              <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${STATUS_BADGE[order.status] || 'bg-gray-100 text-gray-800'}`}>
+                                {order.status}
+                              </span>
+                            </div>
+                            <div className="text-sm text-gray-600 mb-2">
+                              {order.items?.map((item, i) => (
+                                <span key={item.id ?? item.menuItemName}>{i > 0 && ', '}{item.quantity}x {item.menuItemName}</span>
+                              ))}
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-gray-900">&euro;{Number(order.totalAmount).toFixed(2)}</span>
+                              {ORDER_STATUS_FLOW[order.status] && (
+                                <button
+                                  onClick={() => handleStatusUpdate(order.id, ORDER_STATUS_FLOW[order.status].next)}
+                                  className={`px-3 py-1.5 text-white text-xs font-medium rounded-lg transition ${ORDER_STATUS_FLOW[order.status].color}`}
+                                >
+                                  {ORDER_STATUS_FLOW[order.status].label}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {restaurants.length > 0 && activeTab !== 'orders' && (
+          /* ====== MENU TAB ====== */
           <div className="space-y-6">
             {restaurants.map((restaurant) => (
               <div key={restaurant.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
