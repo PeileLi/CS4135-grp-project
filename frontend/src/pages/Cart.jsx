@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-// 如果没有安装图标库，可以用文字代替，或者 npm install lucide-react
 import { Trash2, Plus, Minus, ArrowLeft } from 'lucide-react'; 
 
 const Cart = () => {
@@ -28,12 +27,12 @@ const Cart = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* 左侧：商品列表 */}
+            {/* Cart items */}
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
                 <div key={item.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-4 w-full sm:w-auto">
-                    {/* 简单的图片占位 */}
+                    
                     <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs font-bold">
                       IMG
                     </div>
@@ -44,7 +43,7 @@ const Cart = () => {
                   </div>
                   
                   <div className="flex items-center justify-between w-full sm:w-auto gap-6">
-                    {/* 数量控制 */}
+                    {/* Quantity controls */}
                     <div className="flex items-center gap-3 bg-gray-100 rounded-lg px-3 py-1">
                       <button 
                         onClick={() => decreaseCartItem(item.id)}
@@ -61,7 +60,7 @@ const Cart = () => {
                       </button>
                     </div>
 
-                    {/* 删除按钮 */}
+                    {/* Remove button */}
                     <button 
                       onClick={() => removeFromCart(item.id)}
                       className="text-gray-400 hover:text-red-500 transition p-2"
@@ -73,7 +72,7 @@ const Cart = () => {
               ))}
             </div>
 
-            {/* 右侧：结算卡片 */}
+            {/* Order summary */}
             <div className="lg:col-span-1">
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-24">
                 <h3 className="text-xl font-bold mb-4">Order Summary</h3>

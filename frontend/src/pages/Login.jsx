@@ -11,7 +11,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const { login } = useAuth(); // Context 里的 login 只负责存数据
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
